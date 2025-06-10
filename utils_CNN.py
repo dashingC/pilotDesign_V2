@@ -181,27 +181,27 @@ def load_channel(num_pilots, SNR):
     perfect = loadmat("./VehA_perfect_all.mat")["H_p_rearranged"]
     perfect = np.transpose(perfect, [2, 0, 1])
     print("\n输入完美信道大小：", perfect.shape)
-    perfect_image = np.zeros((len(perfect), 72, 14, 2))
+    perfect_image = np.zeros((len(perfect), 612, 14, 2))
     perfect_image[:, :, :, 0] = np.real(perfect)
     perfect_image[:, :, :, 1] = np.imag(perfect)
-    #1perfect_image = np.concatenate((perfect_image[:, :, :, 0], perfect_image[:, :, :, 1]), axis=0).reshape(2 * len(perfect), 72, 14, 1)
+    #1perfect_image = np.concatenate((perfect_image[:, :, :, 0], perfect_image[:, :, :, 1]), axis=0).reshape(2 * len(perfect), 612, 14, 1)
     #1perfect_image = perfect_image.squeeze()
     #1perfect_image = perfect_image.reshape((perfect_image.shape[0], np.dot(perfect_image.shape[1], perfect_image.shape[2])))
-    perfect_image = np.concatenate((perfect_image[:, :, :, 0], perfect_image[:, :, :, 1]), axis=0)  # (2*N, 72, 14)
-    perfect_image = np.expand_dims(perfect_image, axis=-1)  # <--- 添加通道维 (2*N, 72, 14, 1)
+    perfect_image = np.concatenate((perfect_image[:, :, :, 0], perfect_image[:, :, :, 1]), axis=0)  # (2*N, 612, 14)
+    perfect_image = np.expand_dims(perfect_image, axis=-1)  # <--- 添加通道维 (2*N, 612, 14, 1)
     print("\n分离实部和虚部，展平后的输入完美信道大小：", perfect_image.shape)
 
     noisy = loadmat("./VehA_noisy_all.mat")["H_p_noisy"]
     noisy = np.transpose(noisy, [2, 0, 1])
     print("\n输入含噪信道大小：", noisy.shape)
-    noisy_image = np.zeros((len(noisy), 72, 14, 2))
+    noisy_image = np.zeros((len(noisy), 612, 14, 2))
     noisy_image[:, :, :, 0] = np.real(noisy)
     noisy_image[:, :, :, 1] = np.imag(noisy)
-    #1noisy_image = np.concatenate((noisy_image[:, :, :, 0], noisy_image[:, :, :, 1]), axis=0).reshape(2 * len(noisy), 72, 14, 1)
+    #1noisy_image = np.concatenate((noisy_image[:, :, :, 0], noisy_image[:, :, :, 1]), axis=0).reshape(2 * len(noisy), 612, 14, 1)
     #1noisy_image = noisy_image.squeeze()
     #1noisy_image = noisy_image.reshape((noisy_image.shape[0], np.dot(noisy_image.shape[1], noisy_image.shape[2])))
-    noisy_image = np.concatenate((noisy_image[:, :, :, 0], noisy_image[:, :, :, 1]), axis=0)  # (2*N, 72, 14)
-    noisy_image = np.expand_dims(noisy_image, axis=-1)  # <--- 添加通道维 (2*N, 72, 14, 1)
+    noisy_image = np.concatenate((noisy_image[:, :, :, 0], noisy_image[:, :, :, 1]), axis=0)  # (2*N, 612, 14)
+    noisy_image = np.expand_dims(noisy_image, axis=-1)  # <--- 添加通道维 (2*N, 612, 14, 1)
     print("\n分离实部和虚部，展平后的输入含噪信道大小：", noisy_image.shape)
 
     train_data, test_data, train_label, test_label = train_test_split(noisy_image, perfect_image, test_size=1 / 9,random_state=1)
@@ -219,40 +219,40 @@ def interpolate_model_cnn(selected_features): # 输入 K 个特征 (None, K)
     else:  # Eager 模式
         K_value = selected_features.shape[-1]
 
-    target_height = 72
+    target_height = 612
     target_width = 14
     target_channels = 1
 
     # 1. 映射 K 个特征到初始 CNN 状态
-    init_h = target_height // 8  # 9
+    init_h = target_height // 12  # 51
     init_w = target_width // 2  # 7
     init_channels = 128
     x = Dense(init_h * init_w * init_channels)(selected_features)
     x = LeakyReLU(0.2)(x)
-    x = Reshape((init_h, init_w, init_channels))(x)  # (None, 9, 7, 128)
+    x = Reshape((init_h, init_w, init_channels))(x)  # (None, 51, 7, 128)
 
     # 2. 上采样放大
-    # (18, 14, 64)
+    # (102, 14, 64)
     x = Conv2DTranspose(64, kernel_size=(4, 4), strides=(2, 2), padding='same')(x)
     x = BatchNormalization()(x)
     x = LeakyReLU(0.2)(x)
     x = Dropout(0.1)(x)
 
-    # (36, 14, 32)
+    # (204, 14, 32)
     x = Conv2DTranspose(32, kernel_size=(4, 4), strides=(2, 1), padding='same')(x)
     x = BatchNormalization()(x)
     x = LeakyReLU(0.2)(x)
     x = Dropout(0.1)(x)
 
-    # (72, 14, 16)
-    x = Conv2DTranspose(16, kernel_size=(4, 4), strides=(2, 1), padding='same')(x)
+    # (612, 14, 16)
+    x = Conv2DTranspose(16, kernel_size=(3, 3), strides=(3, 1), padding='same')(x)
     x = BatchNormalization()(x)
     x = LeakyReLU(0.2)(x)
     x = Dropout(0.1)(x)
 
     # 3. 输出目标形状
     output_image = Conv2D(target_channels, kernel_size=(3, 3), activation='linear', padding='same')(
-        x)  # (None, 72, 14, 1)
+        x)  # (None, 612, 14, 1)
 
     # print("CNN Interpolator Output Shape:", output_image.shape) # 运行时打印
     return output_image
