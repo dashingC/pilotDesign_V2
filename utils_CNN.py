@@ -18,7 +18,7 @@ from tensorflow.keras.layers import (Conv2D, Input, BatchNormalization, Activati
 class ConcreteAutoencoderFeatureSelector:
 
     def __init__(self, K, output_function, num_epochs=300, batch_size=None, learning_rate=0.001, start_temp=10.0,
-                 min_temp=0.1, tryout_limit=10):
+                 min_temp=0.1, tryout_limit=2):
         self.K = K # K= 48 ,输出函数是插值函数
         self.output_function = output_function
         self.num_epochs = num_epochs
