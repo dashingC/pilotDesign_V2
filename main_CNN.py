@@ -15,9 +15,9 @@ def FS_SR():
     #x_train = np.reshape(x_train, (len(x_train), -1))
     #x_test = np.reshape(x_test, (len(x_test), -1))
 
-    print(f"训练集形状: {x_train.shape}, 标签形状: {y_train.shape}")  # 应为 (N, 72, 14, 1)
-    print(f"测试集形状: {x_test.shape}, 标签形状: {y_test.shape}")  # 应为 (N, 72, 14, 1)
-    print(f"验证集形状: {x_val.shape}, 标签形状: {y_val.shape}")  # 应为 (N, 72, 14, 1)
+    print(f"训练集形状: {x_train.shape}, 标签形状: {y_train.shape}")  # 应为 (N, 612, 14, 1)
+    print(f"测试集形状: {x_test.shape}, 标签形状: {y_test.shape}")  # 应为 (N, 612, 14, 1)
+    print(f"验证集形状: {x_val.shape}, 标签形状: {y_val.shape}")  # 应为 (N, 612, 14, 1)
 
     num_epochs = 1
 
