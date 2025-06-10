@@ -1,7 +1,7 @@
 import numpy as np
-from utils_new1 import ConcreteAutoencoderFeatureSelector
-from utils_new1 import interpolate_model,interpolate_model_cnn
-from utils_new1 import load_channel
+from utils_CNN import ConcreteAutoencoderFeatureSelector
+from utils_CNN import interpolate_model,interpolate_model_cnn
+from utils_CNN import load_channel
 
 
 def FS_SR():
@@ -19,7 +19,7 @@ def FS_SR():
     print(f"测试集形状: {x_test.shape}, 标签形状: {y_test.shape}")  # 应为 (N, 72, 14, 1)
     print(f"验证集形状: {x_val.shape}, 标签形状: {y_val.shape}")  # 应为 (N, 72, 14, 1)
 
-    num_epochs = 100
+    num_epochs = 1
 
     print("\n=== 正在执行特征选择 ===")
     selector = ConcreteAutoencoderFeatureSelector(K=num_pilots, output_function=interpolate_model_cnn,
